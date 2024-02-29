@@ -1,0 +1,15 @@
+{
+  "name": "thunfisch-chat-discord",
+  "version": "1.0.0",
+  "description": "Discord Chat Bot using GPT",
+  "main": "src/chat.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "openai": "^4.28.4"
+  }
+}
