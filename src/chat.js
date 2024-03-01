@@ -19,7 +19,7 @@ client.once(Events.ClientReady, (readyClient) => {
 
 client.on(Events.MessageCreate, (message) => {
 	console.log(`Nachricht von ${message.author.tag}: ${message.content}`)
-	if (message.author.id !== client.user.id) {
+	if (message.author.id !== client.user.id && message.channel.id === process.env.DISCORD_CHANNEl) {
 		let prompt = `${message.author.tag}: ${message.content.replaceAll("<@1212757770579746816>", "@Endler")}`
 		console.log(prompt)
 		openai.chat(prompt, (response) => {
