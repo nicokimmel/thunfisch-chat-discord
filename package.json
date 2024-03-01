@@ -4,12 +4,13 @@
   "description": "Discord Chat Bot using GPT",
   "main": "src/chat.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/chat.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "discord.js": "^14.14.1",
-    "openai": "^4.28.4"
+    "openai": "^4.28.4",
+    "dotenv": "^16.4.5"
   }
 }
