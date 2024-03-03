@@ -1,5 +1,17 @@
 require("dotenv").config()
 
+const express = require("express")
+const app = express()
+const http = require("http").Server(app)
+
+http.listen(process.env.PORT, () => {
+	console.log(`Server läuft auf *${process.env.PORT}`)
+})
+
+app.get("/", (req, res) => {
+	res.send("success")
+})
+
 const { Client, Events, GatewayIntentBits } = require("discord.js")
 const client = new Client({
 	intents: [
