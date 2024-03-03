@@ -18,7 +18,7 @@ client.once(Events.ClientReady, (readyClient) => {
 })
 
 client.on(Events.MessageCreate, (message) => {
-	if (message.author.id !== client.user.id && message.channel.id === process.env.DISCORD_CHANNEl) {
+	if (message.author.id !== client.user.id && message.channel.id === process.env.DISCORD_CHANNEL) {
 
 		let prompt = `${message.author.tag}: ${message.content.replaceAll("<@1212757770579746816>", "Endler")}`
 
