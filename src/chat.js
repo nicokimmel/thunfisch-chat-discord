@@ -1,6 +1,6 @@
 require("dotenv").config()
 
-const { Client, Events, GatewayIntentBits } = require('discord.js')
+const { Client, Events, GatewayIntentBits } = require("discord.js")
 const client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
@@ -18,13 +18,35 @@ client.once(Events.ClientReady, (readyClient) => {
 })
 
 client.on(Events.MessageCreate, (message) => {
-	console.log(`Nachricht von ${message.author.tag}: ${message.content}`)
 	if (message.author.id !== client.user.id && message.channel.id === process.env.DISCORD_CHANNEl) {
-		let prompt = `${message.author.tag}: ${message.content.replaceAll("<@1212757770579746816>", "@Endler")}`
-		console.log(prompt)
+
+		let prompt = `${message.author.tag}: ${message.content.replaceAll("<@1212757770579746816>", "Endler")}`
+
 		openai.chat(prompt, (response) => {
-			if (response !== "$NOPE$") {
-				message.channel.send(response)
+
+			console.log(response)
+
+			let tagMatch = response.match(/\$(PING|INFO|MISC)\$/)
+			let tag = tagMatch ? tagMatch[1] : null
+
+			let untagged = response.replace(/\s*\$(PING|INFO|MISC)\$/g, "")
+
+			switch (tag) {
+				case "PING":
+					message.reply(untagged)
+					break
+				case "INFO":
+					message.reply(untagged)
+					break
+				case "MISC":
+					let percent = Math.random()
+					console.log(percent)
+					if (percent < 0.05) {
+						message.channel.send(untagged)
+					}
+					break
+				default:
+					break
 			}
 		})
 	}
