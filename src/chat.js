@@ -29,32 +29,34 @@ client.once(Events.ClientReady, (readyClient) => {
 	console.log(`Eingeloggt als ${readyClient.user.tag}`)
 })
 
-client.on(Events.MessageCreate, (message) => {
+client.on(Events.MessageCreate, async (message) => {
 	if (message.author.id !== client.user.id && message.channel.id === process.env.DISCORD_CHANNEL) {
 
-		let prompt = `${message.author.tag}: ${message.content.replaceAll("<@1212757770579746816>", "Endler")}`
+		let cleanContent = await replacePings(message)
+		let prompt = `${message.author.displayName}: ${cleanContent}`
 
 		openai.chat(prompt, (response) => {
 
 			console.log(response)
 
-			let tagMatch = response.match(/\$(PING|INFO|MISC)\$/)
-			let tag = tagMatch ? tagMatch[1] : null
+			let { contentTag, untaggedContent } = removeTags(response)
 
-			let untagged = response.replace(/\s*\$(PING|INFO|MISC)\$/g, "")
+			if (untaggedContent === "") {
+				return
+			}
 
-			switch (tag) {
+			switch (contentTag) {
 				case "PING":
-					message.reply(untagged)
+					message.reply(untaggedContent)
 					break
 				case "INFO":
-					message.reply(untagged)
+					message.channel.send(untaggedContent)
 					break
 				case "MISC":
 					let percent = Math.random()
 					console.log(percent)
-					if (percent < 0.05) {
-						message.channel.send(untagged)
+					if (percent < 0.10) {
+						message.channel.send(untaggedContent)
 					}
 					break
 				default:
@@ -65,3 +67,28 @@ client.on(Events.MessageCreate, (message) => {
 })
 
 client.login(process.env.DISCORD_TOKEN)
+
+async function replacePings(message) {
+	let cleanContent = message.content
+	const userMentions = message.mentions.users
+	if (userMentions) {
+		for (const [id, user] of userMentions) {
+			const member = await message.guild.members.fetch(id)
+			cleanContent = cleanContent.replace(new RegExp(`<@!?${id}>`, 'g'), member.displayName)
+		}
+	}
+	const roleMentions = message.mentions.roles
+	if (roleMentions) {
+		for (const [id, role] of roleMentions) {
+			cleanContent = cleanContent.replace(new RegExp(`<@&${id}>`, 'g'), role.name)
+		}
+	}
+	return cleanContent
+}
+
+function removeTags(messageContent) {
+	let tagMatch = messageContent.match(/\$(PING|INFO|MISC)\$/)
+	let tag = tagMatch ? tagMatch[1] : null
+	let content = messageContent.replace(/\s*\$(PING|INFO|MISC)\$/g, "")
+	return { contentTag: tag, untaggedContent: content }
+}
