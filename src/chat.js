@@ -44,7 +44,7 @@ client.on(Events.MessageCreate, async (message) => {
 
 	let history = await collectReplyHistory(message)
 	history.unshift({ "role": "assistant", "content": process.env.OPENAI_SYSTEM_PROMPT })
-
+	
 	openai.chat(history, (response) => {
 		message.reply(response)
 	})
@@ -60,7 +60,7 @@ async function replacePings(message) {
 	if (userMentions) {
 		for (const [id, user] of userMentions) {
 			const member = await message.guild.members.fetch(id)
-			cleanContent = cleanContent.replace(new RegExp(`<@!?${id}>`, 'g'), member.displayName)
+			cleanContent = cleanContent.replace(new RegExp(`<@!?${id}>`, 'g'), member.user.username)
 		}
 	}
 
@@ -95,12 +95,13 @@ async function containsEndler(message) {
 }
 
 async function collectReplyHistory(message, history = []) {
-
+	
+	const cleanContent = await replacePings(message)
 	if (message.author.id === process.env.DISCORD_BOT_ID) {
-		history.unshift({ "role": "assistant", "content": message.content })
+		history.unshift({ "role": "assistant", "content": cleanContent })
 	} else {
 		let senderName = message.author.username
-		history.unshift({ "role": "user", "content": `${senderName}: ${message.content}` })
+		history.unshift({ "role": "user", "content": `${senderName}: ${cleanContent}` })
 	}
 
 	if (message.reference && message.reference.messageId) {
