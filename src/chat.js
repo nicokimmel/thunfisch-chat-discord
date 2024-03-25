@@ -44,9 +44,34 @@ client.on(Events.MessageCreate, async (message) => {
 		return
 	}
 
+	if (message.attachments.size > 0) {
+		const cleanContent = await replacePings(message)
+		let imageContent = [
+			{ type: "text", text: cleanContent }
+		]
+		for (const attachment of message.attachments.values()) {
+			let contentType = attachment.contentType
+			if (contentType.includes("image")) {
+				imageContent.push({
+					type: "image_url",
+					image_url: {
+						"url": attachment.url
+					}
+				})
+			}
+		}
+		let messages = [
+			{ role: "system", content: process.env.SYSTEM_PROMPT },
+			{ role: "user", content: imageContent }
+		]
+		openai.image(messages, (response) => {
+			message.reply(response)
+		})
+		return
+	}
+
 	let history = await collectReplyHistory(message)
-	history.unshift({ "role": "system", "content": process.env.SYSTEM_PROMPT })
-	
+	history.unshift({ role: "system", content: process.env.SYSTEM_PROMPT })
 	openai.chat(history, (response) => {
 		message.reply(response)
 	})
@@ -97,7 +122,7 @@ async function containsEndler(message) {
 }
 
 async function collectReplyHistory(message, history = []) {
-	
+
 	const cleanContent = await replacePings(message)
 	if (message.author.id === process.env.DISCORD_BOT_ID) {
 		history.unshift({ "role": "assistant", "content": cleanContent })
