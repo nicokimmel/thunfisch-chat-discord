@@ -11,10 +11,11 @@ class AnthropicWrapper {
     async chat(messages, callback) {
         const message = await this.anthropic.messages.create({
             max_tokens: 1024,
-            messages:messages,
+            messages: messages,
             model: "claude-3-haiku-20240307",
         })
-        callback(message.content)
+        console.log(message)
+        callback(message.content[0].text)
     }
 }
 
