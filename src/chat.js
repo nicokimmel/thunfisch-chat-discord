@@ -22,10 +22,10 @@ const client = new Client({
 	]
 })
 
-//const { OpenAIWrapper } = require("./openai.js")
-//const openai = new OpenAIWrapper()
-const { AnthropicWrapper } = require("./anthropic.js")
-const anthropic = new AnthropicWrapper()
+const { OpenAIWrapper } = require("./openai.js")
+const openai = new OpenAIWrapper()
+//const { AnthropicWrapper } = require("./anthropic.js")
+//const anthropic = new AnthropicWrapper()
 
 client.once(Events.ClientReady, (readyClient) => {
 	console.log(`Eingeloggt als ${readyClient.user.tag}`)
@@ -45,10 +45,9 @@ client.on(Events.MessageCreate, async (message) => {
 	}
 
 	let history = await collectReplyHistory(message)
-	history.unshift({ "role": "assistant", "content": "OK" })
-	history.unshift({ "role": "user", "content": process.env.SYSTEM_PROMPT })
+	history.unshift({ "role": "system", "content": process.env.SYSTEM_PROMPT })
 	
-	anthropic.chat(history, (response) => {
+	openai.chat(history, (response) => {
 		message.reply(response)
 	})
 })

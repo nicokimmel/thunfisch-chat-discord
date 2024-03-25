@@ -14,7 +14,6 @@ class AnthropicWrapper {
             messages: messages,
             model: "claude-3-haiku-20240307",
         })
-        console.log(message)
         callback(message.content[0].text)
     }
 }
