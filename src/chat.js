@@ -24,8 +24,6 @@ const client = new Client({
 
 const { OpenAIWrapper } = require("./openai.js")
 const openai = new OpenAIWrapper()
-//const { AnthropicWrapper } = require("./anthropic.js")
-//const anthropic = new AnthropicWrapper()
 
 client.once(Events.ClientReady, (readyClient) => {
 	console.log(`Eingeloggt als ${readyClient.user.tag}`)
@@ -40,7 +38,7 @@ client.on(Events.MessageCreate, async (message) => {
 		return
 	}
 
-	if (!await containsEndler(message)) {
+	if (!await containsBotName(message)) {
 		return
 	}
 
@@ -101,9 +99,9 @@ async function replacePings(message) {
 	return cleanContent
 }
 
-async function containsEndler(message) {
+async function containsBotName(message) {
 
-	if (message.content.toLowerCase().includes("<@1212757770579746816>")) {
+	if (message.content.toLowerCase().includes(`<@${process.env.DISCORD_BOT_ID}>`)) {
 		return true
 	}
 
