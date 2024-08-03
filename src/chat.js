@@ -30,6 +30,7 @@ function loadSystemPrompt() {
 
 	try {
 		systemPrompt = fs.readFileSync("prompt.md", "utf8")
+		systemPrompt.replace("${DATETIME}", new Date().toLocaleString('de-DE', {hour12: false}))
 	} catch (error) {
 		console.log(error)
 		console.log("Konnte prompt.md nicht laden. Verwende Umgebungsvariable SYSTEM_PROMPT.")
