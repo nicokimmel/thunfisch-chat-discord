@@ -1,5 +1,5 @@
 require("dotenv").config()
-
+const fs = require("fs")
 const express = require("express")
 const app = express()
 const http = require("http").Server(app)
@@ -24,6 +24,21 @@ const client = new Client({
 
 const { OpenAIWrapper } = require("./openai.js")
 const openai = new OpenAIWrapper()
+
+function loadSystemPrompt() {
+	let systemPrompt = process.env.SYSTEM_PROMPT
+
+	try {
+		const data = fs.readFileSync("prompt.md", "utf8")
+		systemPrompt = JSON.parse(data).prompt
+	} catch (error) {
+		console.log("Konnte prompt.md nicht laden. Verwende Umgebungsvariable SYSTEM_PROMPT.")
+	}
+
+	return systemPrompt
+}
+
+const systemPrompt = loadSystemPrompt()
 
 client.once(Events.ClientReady, (readyClient) => {
 	console.log(`Eingeloggt als ${readyClient.user.tag}`)
@@ -59,7 +74,7 @@ client.on(Events.MessageCreate, async (message) => {
 			}
 		}
 		let messages = [
-			{ role: "system", content: process.env.SYSTEM_PROMPT },
+			{ role: "system", content: systemPrompt },
 			{ role: "user", content: imageContent }
 		]
 		openai.image(messages, (response) => {
@@ -69,7 +84,7 @@ client.on(Events.MessageCreate, async (message) => {
 	}
 
 	let history = await collectReplyHistory(message)
-	history.unshift({ role: "system", content: process.env.SYSTEM_PROMPT })
+	history.unshift({ role: "system", content: systemPrompt })
 	openai.chat(history, (response) => {
 		message.reply(response)
 	})
@@ -78,21 +93,20 @@ client.on(Events.MessageCreate, async (message) => {
 client.login(process.env.DISCORD_TOKEN)
 
 async function replacePings(message) {
-
 	let cleanContent = message.content
 
 	const userMentions = message.mentions.users
 	if (userMentions) {
 		for (const [id, user] of userMentions) {
 			const member = await message.guild.members.fetch(id)
-			cleanContent = cleanContent.replace(new RegExp(`<@!?${id}>`, 'g'), member.user.username)
+			cleanContent = cleanContent.replace(new RegExp(`<@!?${id}>`, "g"), member.user.username)
 		}
 	}
 
 	const roleMentions = message.mentions.roles
 	if (roleMentions) {
 		for (const [id, role] of roleMentions) {
-			cleanContent = cleanContent.replace(new RegExp(`<@&${id}>`, 'g'), role.name)
+			cleanContent = cleanContent.replace(new RegExp(`<@&${id}>`, "g"), role.name)
 		}
 	}
 
@@ -100,7 +114,6 @@ async function replacePings(message) {
 }
 
 async function containsBotName(message) {
-
 	if (message.content.toLowerCase().includes(`<@${process.env.DISCORD_BOT_ID}>`)) {
 		return true
 	}
@@ -120,7 +133,6 @@ async function containsBotName(message) {
 }
 
 async function collectReplyHistory(message, history = []) {
-
 	const cleanContent = await replacePings(message)
 	if (message.author.id === process.env.DISCORD_BOT_ID) {
 		history.unshift({ "role": "assistant", "content": cleanContent })
