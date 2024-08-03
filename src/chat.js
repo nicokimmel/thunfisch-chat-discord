@@ -29,9 +29,9 @@ function loadSystemPrompt() {
 	let systemPrompt = process.env.SYSTEM_PROMPT
 
 	try {
-		const data = fs.readFileSync("prompt.md", "utf8")
-		systemPrompt = JSON.parse(data).prompt
+		systemPrompt = fs.readFileSync("prompt.md", "utf8")
 	} catch (error) {
+		console.log(error)
 		console.log("Konnte prompt.md nicht laden. Verwende Umgebungsvariable SYSTEM_PROMPT.")
 	}
 
